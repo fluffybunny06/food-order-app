@@ -1,19 +1,24 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { type ChangeEvent, useRef, useState } from "react";
 import classes from "./image-picker.module.css";
 import Image from "next/image";
 
-export default function ImagePicker({ label, name }) {
-  const [pickedImage, setPickedImage] = useState();
-  const inputImage = useRef();
+type ImagePickerProps = {
+  label: string;
+  name: string;
+};
+
+export default function ImagePicker({ label, name }: ImagePickerProps) {
+  const [pickedImage, setPickedImage] = useState<string | null>(null);
+  const inputImage = useRef<HTMLInputElement>(null);
 
   function handleImagePickClick() {
-    inputImage.current.click();
+    inputImage.current?.click();
   }
 
-  function handleImageChange(event) {
-    const file = event.target.files[0];
+  function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
 
     if (!file) {
       setPickedImage(null);
@@ -23,7 +28,7 @@ export default function ImagePicker({ label, name }) {
     const fileReader = new FileReader();
 
     fileReader.onload = () => {
-      setPickedImage(fileReader.result);
+      setPickedImage(fileReader.result as string);
     };
 
     fileReader.readAsDataURL(file);

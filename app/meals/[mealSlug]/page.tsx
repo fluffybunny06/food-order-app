@@ -3,9 +3,19 @@ import Image from "next/image";
 import { getMeal } from "@/lib/meals";
 import classes from "./page.module.css";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
-export async function generateMetadata({ params }) {
-  const meal = getMeal((await params).mealSlug);
+type MealDetailsPageProps = {
+  params: Promise<{
+    mealSlug: string;
+  }>;
+};
+
+export async function generateMetadata({
+  params,
+}: MealDetailsPageProps): Promise<Metadata> {
+  const { mealSlug } = await params;
+  const meal = getMeal(mealSlug);
 
   if (!meal) {
     notFound();
@@ -17,8 +27,11 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function MealDetailsPage({ params }) {
-  const meal = getMeal((await params).mealSlug);
+export default async function MealDetailsPage({
+  params,
+}: MealDetailsPageProps) {
+  const { mealSlug } = await params;
+  const meal = getMeal(mealSlug);
 
   if (!meal) {
     notFound();

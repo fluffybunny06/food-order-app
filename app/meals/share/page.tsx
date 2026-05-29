@@ -5,18 +5,24 @@ import classes from "./page.module.css";
 import { shareMeal } from "@/lib/actions";
 import MealsFormSubmit from "@/components/meals/meals-form-submit";
 import { useActionState } from "react";
+import type { ShareMealState } from "@/lib/types";
+
+const initialShareMealState: ShareMealState = {
+  message: null,
+  meal: {
+    name: "",
+    email: "",
+    title: "",
+    summary: "",
+    instructions: "",
+  },
+};
 
 export default function ShareMealPage() {
-  const [state, formAction] = useActionState(shareMeal, {
-    message: null,
-    meal: {
-      name: "",
-      email: "",
-      title: "",
-      summary: "",
-      instructions: "",
-    },
-  });
+  const [state, formAction] = useActionState(
+    shareMeal,
+    initialShareMealState
+  );
 
   return (
     <>
@@ -75,7 +81,7 @@ export default function ShareMealPage() {
             <textarea
               id="instructions"
               name="instructions"
-              rows="10"
+              rows={10}
               required
               defaultValue={state.meal?.instructions ?? ""}
             ></textarea>
