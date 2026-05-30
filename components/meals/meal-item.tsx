@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import classes from "./meal-item.module.css";
+import { getMealImageUrl } from "@/lib/images";
 import type { Meal } from "@/lib/types";
 
 type MealItemProps = Pick<
@@ -21,7 +22,7 @@ export default function MealItem({
       <header>
         <div className={classes.image}>
           <Image
-            src={`https://yexuanzhang-nextjs-demo-users-image.s3.amazonaws.com/${image}`}
+            src={getMealImageUrl(image)}
             alt={title}
             fill
           />

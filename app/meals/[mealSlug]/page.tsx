@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import { getMeal } from "@/lib/meals";
+import { getMealImageUrl } from "@/lib/images";
 import classes from "./page.module.css";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -44,7 +45,7 @@ export default async function MealDetailsPage({
       <header className={classes.header}>
         <div className={classes.image}>
           <Image
-            src={`https://yexuanzhang-nextjs-demo-users-image.s3.amazonaws.com/${meal.image}`}
+            src={getMealImageUrl(meal.image)}
             alt={meal.title}
             fill
           />

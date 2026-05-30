@@ -2,17 +2,14 @@ import sql from "better-sqlite3";
 import slugify from "slugify";
 import xss from "xss";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { env } from "./env";
 import type { Meal, MealFormInput } from "./types";
 
-const REGION = process.env.AWS_REGION || "us-east-1";
-const S3_BUCKET =
-  process.env.S3_BUCKET || "yexuanzhang-nextjs-demo-users-image";
-const s3 = new S3Client({ region: REGION });
+const s3 = new S3Client({ region: env.awsRegion });
 
 const db = sql("meals.db");
 
 export async function getMeals(): Promise<Meal[]> {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
   return db.prepare("SELECT * FROM meals").all() as Meal[];
 }
 
@@ -33,7 +30,7 @@ export async function saveMeal(meal: MealFormInput): Promise<void> {
 
   await s3.send(
     new PutObjectCommand({
-      Bucket: S3_BUCKET,
+      Bucket: env.s3Bucket,
       Key: fileName,
       Body: Buffer.from(bufferedImage),
       ContentType: meal.image.type,
