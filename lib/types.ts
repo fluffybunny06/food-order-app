@@ -1,5 +1,5 @@
 export type Meal = {
-  id: number;
+  id: string;
   slug: string;
   title: string;
   image: string;

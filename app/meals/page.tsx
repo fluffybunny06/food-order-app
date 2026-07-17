@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: "Browse the delicious meals shared by our vibrant community.",
 };
 
+export const dynamic = "force-dynamic";
+
 async function Meals() {
   const meals = await getMeals();
 

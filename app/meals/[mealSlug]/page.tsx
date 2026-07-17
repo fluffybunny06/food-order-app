@@ -16,7 +16,7 @@ export async function generateMetadata({
   params,
 }: MealDetailsPageProps): Promise<Metadata> {
   const { mealSlug } = await params;
-  const meal = getMeal(mealSlug);
+  const meal = await getMeal(mealSlug);
 
   if (!meal) {
     notFound();
@@ -32,7 +32,7 @@ export default async function MealDetailsPage({
   params,
 }: MealDetailsPageProps) {
   const { mealSlug } = await params;
-  const meal = getMeal(mealSlug);
+  const meal = await getMeal(mealSlug);
 
   if (!meal) {
     notFound();

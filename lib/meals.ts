@@ -1,22 +1,44 @@
-import sql from "better-sqlite3";
 import slugify from "slugify";
 import xss from "xss";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "./env";
+import { prisma } from "./prisma";
 import type { Meal, MealFormInput } from "./types";
+import type { Meal as PrismaMeal } from "@prisma/client";
 
 const s3 = new S3Client({ region: env.awsRegion });
 
-const db = sql("meals.db");
-
-export async function getMeals(): Promise<Meal[]> {
-  return db.prepare("SELECT * FROM meals").all() as Meal[];
+function mapMeal(meal: PrismaMeal): Meal {
+  return {
+    id: meal.id,
+    slug: meal.slug,
+    title: meal.title,
+    image: meal.imageKey,
+    summary: meal.summary,
+    instructions: meal.instructions,
+    creator: meal.creatorName,
+    creator_email: meal.creatorEmail,
+  };
 }
 
-export function getMeal(slug: string): Meal | undefined {
-  return db.prepare("SELECT * FROM meals WHERE slug = ?").get(slug) as
-    | Meal
-    | undefined;
+export async function getMeals(): Promise<Meal[]> {
+  const meals = await prisma.meal.findMany({
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+
+  return meals.map(mapMeal);
+}
+
+export async function getMeal(slug: string): Promise<Meal | undefined> {
+  const meal = await prisma.meal.findUnique({
+    where: {
+      slug,
+    },
+  });
+
+  return meal ? mapMeal(meal) : undefined;
 }
 
 export async function saveMeal(meal: MealFormInput): Promise<void> {
@@ -37,27 +59,15 @@ export async function saveMeal(meal: MealFormInput): Promise<void> {
     })
   );
 
-  db.prepare(
-    `
-    INSERT INTO meals
-      (slug, title, image, summary, instructions, creator, creator_email) 
-    VALUES (
-      @slug,
-      @title,
-      @image,
-      @summary,
-      @instructions,
-      @creator,
-      @creator_email
-    ) 
-  `
-  ).run({
-    slug,
-    title: meal.title,
-    image: fileName,
-    summary: meal.summary,
-    instructions,
-    creator: meal.creator,
-    creator_email: meal.creator_email,
+  await prisma.meal.create({
+    data: {
+      slug,
+      title: meal.title,
+      imageKey: fileName,
+      summary: meal.summary,
+      instructions,
+      creatorName: meal.creator,
+      creatorEmail: meal.creator_email,
+    },
   });
 }

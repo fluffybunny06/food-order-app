@@ -1,11 +1,12 @@
-const sql = require("better-sqlite3");
-const db = sql("meals.db");
+const { PrismaClient } = require("@prisma/client");
 
-const dummyMeals = [
+const prisma = new PrismaClient();
+
+const demoMeals = [
   {
     title: "Juicy Cheese Burger",
     slug: "juicy-cheese-burger",
-    image: "burger.jpg",
+    imageKey: "burger.jpg",
     summary:
       "A mouth-watering burger with a juicy beef patty and melted cheese, served in a soft bun.",
     instructions: `
@@ -21,21 +22,21 @@ const dummyMeals = [
       4. Serve:
          Complete the assembly with the top bun and serve hot.
     `,
-    creator: "John Doe",
-    creator_email: "johndoe@example.com",
+    creatorName: "John Doe",
+    creatorEmail: "johndoe@example.com",
   },
   {
     title: "Spicy Curry",
     slug: "spicy-curry",
-    image: "curry.jpg",
+    imageKey: "curry.jpg",
     summary:
       "A rich and spicy curry, infused with exotic spices and creamy coconut milk.",
     instructions: `
       1. Chop vegetables:
          Cut your choice of vegetables into bite-sized pieces.
 
-      2. Sauté vegetables:
-         In a pan with oil, sauté the vegetables until they start to soften.
+      2. Saute vegetables:
+         In a pan with oil, saute the vegetables until they start to soften.
 
       3. Add curry paste:
          Stir in 2 tablespoons of curry paste and cook for another minute.
@@ -46,13 +47,13 @@ const dummyMeals = [
       5. Serve:
          Enjoy this creamy curry with rice or bread.
     `,
-    creator: "Max Schwarz",
-    creator_email: "max@example.com",
+    creatorName: "Max Schwarz",
+    creatorEmail: "max@example.com",
   },
   {
     title: "Homemade Dumplings",
     slug: "homemade-dumplings",
-    image: "dumplings.jpg",
+    imageKey: "dumplings.jpg",
     summary:
       "Tender dumplings filled with savory meat and vegetables, steamed to perfection.",
     instructions: `
@@ -68,13 +69,13 @@ const dummyMeals = [
       4. Serve:
          Enjoy these dumplings hot, with a dipping sauce of your choice.
     `,
-    creator: "Emily Chen",
-    creator_email: "emilychen@example.com",
+    creatorName: "Emily Chen",
+    creatorEmail: "emilychen@example.com",
   },
   {
     title: "Classic Mac n Cheese",
     slug: "classic-mac-n-cheese",
-    image: "macncheese.jpg",
+    imageKey: "macncheese.jpg",
     summary:
       "Creamy and cheesy macaroni, a comforting classic that's always a crowd-pleaser.",
     instructions: `
@@ -93,13 +94,13 @@ const dummyMeals = [
       5. Serve:
          Serve hot, garnished with parsley if desired.
     `,
-    creator: "Laura Smith",
-    creator_email: "laurasmith@example.com",
+    creatorName: "Laura Smith",
+    creatorEmail: "laurasmith@example.com",
   },
   {
     title: "Authentic Pizza",
     slug: "authentic-pizza",
-    image: "pizza.jpg",
+    imageKey: "pizza.jpg",
     summary:
       "Hand-tossed pizza with a tangy tomato sauce, fresh toppings, and melted cheese.",
     instructions: `
@@ -110,18 +111,18 @@ const dummyMeals = [
          Roll out the dough, spread tomato sauce, and add your favorite toppings and cheese.
 
       3. Bake the pizza:
-         Bake in a preheated oven at 220°C for about 15-20 minutes.
+         Bake in a preheated oven at 220 degrees C for about 15-20 minutes.
 
       4. Serve:
          Slice hot and enjoy with a sprinkle of basil leaves.
     `,
-    creator: "Mario Rossi",
-    creator_email: "mariorossi@example.com",
+    creatorName: "Mario Rossi",
+    creatorEmail: "mariorossi@example.com",
   },
   {
     title: "Wiener Schnitzel",
     slug: "wiener-schnitzel",
-    image: "schnitzel.jpg",
+    imageKey: "schnitzel.jpg",
     summary:
       "Crispy, golden-brown breaded veal cutlet, a classic Austrian dish.",
     instructions: `
@@ -132,70 +133,54 @@ const dummyMeals = [
          Coat each cutlet in flour, dip in beaten eggs, and then in breadcrumbs.
 
       3. Fry the schnitzel:
-      Heat oil in a pan and fry each schnitzel until golden brown on both sides.
+         Heat oil in a pan and fry each schnitzel until golden brown on both sides.
 
       4. Serve:
-      Serve hot with a slice of lemon and a side of potato salad or greens.
- `,
-    creator: "Franz Huber",
-    creator_email: "franzhuber@example.com",
+         Serve hot with a slice of lemon and a side of potato salad or greens.
+    `,
+    creatorName: "Franz Huber",
+    creatorEmail: "franzhuber@example.com",
   },
   {
     title: "Fresh Tomato Salad",
     slug: "fresh-tomato-salad",
-    image: "tomato-salad.jpg",
+    imageKey: "tomato-salad.jpg",
     summary:
       "A light and refreshing salad with ripe tomatoes, fresh basil, and a tangy vinaigrette.",
     instructions: `
       1. Prepare the tomatoes:
-        Slice fresh tomatoes and arrange them on a plate.
-    
+         Slice fresh tomatoes and arrange them on a plate.
+
       2. Add herbs and seasoning:
          Sprinkle chopped basil, salt, and pepper over the tomatoes.
-    
+
       3. Dress the salad:
          Drizzle with olive oil and balsamic vinegar.
-    
+
       4. Serve:
          Enjoy this simple, flavorful salad as a side dish or light meal.
     `,
-    creator: "Sophia Green",
-    creator_email: "sophiagreen@example.com",
+    creatorName: "Sophia Green",
+    creatorEmail: "sophiagreen@example.com",
   },
 ];
 
-db.prepare(
-  `
-   CREATE TABLE IF NOT EXISTS meals (
-       id INTEGER PRIMARY KEY AUTOINCREMENT,
-       slug TEXT NOT NULL UNIQUE,
-       title TEXT NOT NULL,
-       image TEXT NOT NULL,
-       summary TEXT NOT NULL,
-       instructions TEXT NOT NULL,
-       creator TEXT NOT NULL,
-       creator_email TEXT NOT NULL
-    )
-`
-).run();
-
-async function initData() {
-  const stmt = db.prepare(`
-      INSERT INTO meals VALUES (
-         null,
-         @slug,
-         @title,
-         @image,
-         @summary,
-         @instructions,
-         @creator,
-         @creator_email
-      )
-   `);
-
-  for (const meal of dummyMeals) {
-    stmt.run(meal);
+async function main() {
+  for (const meal of demoMeals) {
+    await prisma.meal.upsert({
+      where: { slug: meal.slug },
+      update: meal,
+      create: meal,
+    });
   }
 }
 
-initData();
+main()
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (error) => {
+    console.error(error);
+    await prisma.$disconnect();
+    process.exit(1);
+  });
